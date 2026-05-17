@@ -1,8 +1,10 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from './supabaseclient'
+import { saveCurrentUser } from './auth'
+import { logAnalytics } from './analytics'
 
-export default function Login() {
+export default function Login({ onLogin }) {
   const [name, setName] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState(null)
@@ -18,7 +20,7 @@ export default function Login() {
 
     const { data, error } = await supabase
       .from('users')
-      .select('user_id, name')
+      .select('user_id, name, role, email')
       .eq('name', name)
       .eq('password', password)
       .single()
@@ -26,9 +28,17 @@ export default function Login() {
     setLoading(false)
 
     if (error || !data) {
+      await logAnalytics('login_failure', {
+        page: 'login',
+        metadata: { attempted_name: name },
+      })
       setError('Login failed. Please check your name and password.')
       return
     }
+
+    saveCurrentUser(data)
+    onLogin?.(data)
+    await logAnalytics('login_success', { page: 'login' })
 
     setSuccess(`Welcome back, ${data.name}! Redirecting to Browse Movies...`)
     setTimeout(() => {

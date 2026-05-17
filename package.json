@@ -1,0 +1,34 @@
+{
+  "name": "csc4303_final_project",
+  "version": "1.0.0",
+  "description": "Final Project for Dr. Uju's CSC4303 - Database Management Systems class.",
+  "main": "analytics.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ref020/CSC4303_Final_Project.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/ref020/CSC4303_Final_Project/issues"
+  },
+  "homepage": "https://github.com/ref020/CSC4303_Final_Project#readme",
+  "dependencies": {
+    "@supabase/supabase-js": "^2.105.4",
+    "react": "^19.2.6",
+    "react-dom": "^19.2.6",
+    "react-router-dom": "^7.15.1"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-react": "^6.0.2",
+    "vite": "^8.0.13"
+  }
+}

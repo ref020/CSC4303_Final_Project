@@ -1,15 +1,21 @@
 import { useEffect, useState } from 'react'
 import { supabase } from './supabaseclient'
+import { getCurrentUser } from './auth'
+import { logAnalytics } from './analytics'
 
 const isUrlString = (value) => {
   if (typeof value !== 'string') return false
   return /^(https?:\/\/|www\.)[\w\-]+(\.[\w\-]+)+[\w\-.,@?^=%&:/~+#]*[\w@?^=%&/~+#]$/.test(value)
 }
 
+const getMovieUrl = (movie) => movie.url || movie.link || movie.movie_url || movie.link_url || ''
+const getMovieTitle = (movie) => movie.title || movie.name || movie.movie_title || `ID ${movie.movie_id ?? movie.id ?? 'unknown'}`
+
 export default function Browse() {
   const [movies, setMovies] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
+  const currentUser = getCurrentUser()
 
   useEffect(() => {
     async function loadMovies() {
@@ -21,12 +27,28 @@ export default function Browse() {
         setError(error.message)
       } else {
         setMovies(data ?? [])
+        await logAnalytics('browse_page_view', {
+          page: 'browse',
+          metadata: { total_movies: data?.length ?? 0 },
+        })
       }
       setLoading(false)
     }
 
     loadMovies()
   }, [])
+
+  async function handleMovieClick(movie) {
+    await logAnalytics('movie_click', {
+      page: 'browse',
+      movie_id: movie.movie_id ?? movie.id,
+      movie_title: getMovieTitle(movie),
+      metadata: {
+        movie_link: getMovieUrl(movie),
+        clicked_by: currentUser?.name ?? 'anonymous',
+      },
+    })
+  }
 
   if (loading) {
     return <p>Loading movie table...</p>
@@ -89,6 +111,7 @@ export default function Browse() {
                             href={value.startsWith('http') ? value : `https://${value}`}
                             target="_blank"
                             rel="noreferrer"
+                            onClick={() => handleMovieClick(movie)}
                           >
                             {String(value)}
                           </a>
